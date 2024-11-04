@@ -7,7 +7,7 @@ import librosa
 processor = AutoProcessor.from_pretrained("Tagoreparaizo/IAUnit")
 model = AutoModelForAudioClassification.from_pretrained("Tagoreparaizo/IAUnit")
 
-file_path = "angry.wav" #Caminho do áudio
+file_path = "sad.wav" #Caminho do áudio
 audio, sample_rate = librosa.load(file_path, sr=16000)
 
 inputs = processor(audio, sampling_rate=16000, return_tensors="pt", padding=True)
