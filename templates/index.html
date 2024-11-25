@@ -9,15 +9,37 @@
 <body>
     <div class="container">
         <h1>Análise de Emoções por Áudio</h1>
-        <select id="audioSelect">
-            <option value="angry.wav">angry.wav</option>
-            <option value="fear.wav">fear.wav</option>
-            <option value="happy.wav">happy.wav</option>
-            <option value="sad.wav">sad.wav</option>
-        </select>
+        
+        <div class="recording-section">
+            <h2>Gravar Áudio</h2>
+            <button id="startRecording" onclick="startRecording()">Começar Gravação</button>
+            <button id="stopRecording" onclick="stopRecording()" disabled>Parar Gravação</button>
+            <p id="recordingStatus">Status: Aguardando...</p>
+        </div>
+        
+        <div class="emotion-identification">
+            <h2>Esse áudio é:</h2>
+            <div class="emotion-options">
+                <label>
+                    <input type="radio" name="emotion" value="angry"> Raiva
+                </label>
+                <label>
+                    <input type="radio" name="emotion" value="fear"> Medo
+                </label>
+                <label>
+                    <input type="radio" name="emotion" value="happy"> Feliz
+                </label>
+                <label>
+                    <input type="radio" name="emotion" value="sad"> Triste
+                </label>
+            </div>
+        </div>
+
         <button onclick="analyzeAudio()">Analisar</button>
+        
         <div id="result"></div>
     </div>
+    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
