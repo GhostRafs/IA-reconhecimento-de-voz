@@ -104,3 +104,105 @@ button:hover:not(:disabled) {
 #result h2 {
   color: #ff5722;
 }
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border: 4px solid #e9f0f9;
+  animation: slideDown 0.5s ease;
+}
+
+.modal-content h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  color: #673ab7;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 10px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#choose-record {
+  background: #ff6f61;
+  color: white;
+}
+
+#choose-upload {
+  background: #4caf50;
+  color: white;
+}
+
+.modal-content button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#audio-upload {
+  display: none;
+}
+
+#upload-button {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  background: linear-gradient(45deg, #4caf50, #81c784);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#upload-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#upload-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.upload-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
