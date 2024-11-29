@@ -1,19 +1,16 @@
 let mediaRecorder;
 let audioChunks = [];
 
-// Botões
 const startRecordingButton = document.getElementById("start-recording");
 const stopRecordingButton = document.getElementById("stop-recording");
-
-// Status
+const audioUploadInput = document.getElementById("audio-upload");
+const uploadButton = document.getElementById("upload-button");
 const statusText = document.getElementById("status");
 
 startRecordingButton.addEventListener("click", async () => {
   try {
-    // Solicitar permissão para o microfone
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    // Iniciar o MediaRecorder
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
       audioChunks.push(event.data);
@@ -30,11 +27,8 @@ startRecordingButton.addEventListener("click", async () => {
       stopRecordingButton.disabled = true;
       startRecordingButton.disabled = false;
 
-      // Criar o blob do áudio gravado
       const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
       audioChunks = [];
-
-      // Enviar o áudio para o backend
       await uploadAudio(audioBlob);
     };
 
@@ -51,12 +45,19 @@ stopRecordingButton.addEventListener("click", () => {
   }
 });
 
-// Função para enviar o áudio para o backend
+uploadButton.addEventListener("click", async () => {
+  const file = audioUploadInput.files[0];
+  if (file) {
+    statusText.textContent = "Enviando áudio carregado...";
+    await uploadAudio(file);
+  } else {
+    statusText.textContent = "Por favor, selecione um arquivo de áudio.";
+  }
+});
+
 async function uploadAudio(audioBlob) {
   const formData = new FormData();
   formData.append("file", audioBlob, "audio.wav");
-
-  statusText.textContent = "Enviando áudio...";
 
   try {
     const response = await fetch("http://127.0.0.1:5000/predict", {
@@ -69,12 +70,13 @@ async function uploadAudio(audioBlob) {
       document.getElementById("emotion").textContent = result.emotion;
       document.getElementById("confidence").textContent = (result.confidence * 100).toFixed(2);
       document.getElementById("result").style.display = "block";
+      statusText.textContent = "Processamento concluído!";
     } else {
       console.error("Erro ao processar o áudio:", await response.text());
       statusText.textContent = "Erro ao processar o áudio.";
     }
   } catch (error) {
-    console.error("Erro na requisição ao backend:", error);
+    console.error("Erro na conexão com o servidor:", error);
     statusText.textContent = "Erro na conexão com o servidor.";
   }
 }

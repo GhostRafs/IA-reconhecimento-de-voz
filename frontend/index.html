@@ -3,21 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DivertIAmente</title>
-  <link rel="stylesheet" href="/frontend/styles.css">
+  <title>Reconhecimento de Emoções</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>DivertIAmente</h1>
-    <button id="start-recording">Gravar Áudio</button>
-    <button id="stop-recording" disabled>Parar</button>
-    <p id="status">Aguardando gravação...</p>
+    <h1>Detecção de Emoções</h1>
+    <div class="controls">
+      <button id="start-recording">Gravar Áudio</button>
+      <button id="stop-recording" disabled>Parar Gravação</button>
+
+      <input type="file" id="audio-upload" accept="audio/*" style="display: none;">
+      <label for="audio-upload" id="upload-button">Enviar Áudio</label>
+    </div>
+
+    <div id="status">Selecione ou grave um áudio.</div>
+
     <div id="result" style="display: none;">
-      <h2>Resultado:</h2>
-      <p>Emoção: <span id="emotion"></span></p>
-      <p>Confiança: <span id="confidence"></span>%</p>
+      <h2>Resultados:</h2>
+      <p><strong>Emoção Detectada:</strong> <span id="emotion"></span></p>
+      <p><strong>Confiança:</strong> <span id="confidence"></span>%</p>
     </div>
   </div>
-  <script src="/frontend/script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
