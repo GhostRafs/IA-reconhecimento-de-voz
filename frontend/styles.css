@@ -1,0 +1,97 @@
+/* Estilo inspirado no filme Divertidamente */
+body {
+  font-family: 'Comic Sans MS', sans-serif; /* Fonte divertida */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(45deg, #ffa5a5, #ffe699, #a7e3f4, #c6a5ff);
+  background-size: 300% 300%;
+  animation: gradientAnimation 8s infinite ease-in-out;
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.container {
+  text-align: center;
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  border: 4px solid #e9f0f9;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #673ab7; /* Cor inspirada em Joy */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#start-recording {
+  background: #ff6f61; /* Cor inspirada em Anger */
+  color: white;
+}
+
+#stop-recording {
+  background: #00bcd4; /* Cor inspirada em Sadness */
+  color: white;
+}
+
+#status {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: #555;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+#result {
+  margin-top: 20px;
+  background: #ffeb3b; /* Cor inspirada em Fear */
+  border-radius: 12px;
+  padding: 20px;
+  color: #333;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#result h2 {
+  color: #ff5722; /* Cor inspirada em Disgust */
+}

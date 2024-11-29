@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DivertIAmente</title>
+  <link rel="stylesheet" href="/frontend/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>DivertIAmente</h1>
+    <button id="start-recording">Gravar Áudio</button>
+    <button id="stop-recording" disabled>Parar</button>
+    <p id="status">Aguardando gravação...</p>
+    <div id="result" style="display: none;">
+      <h2>Resultado:</h2>
+      <p>Emoção: <span id="emotion"></span></p>
+      <p>Confiança: <span id="confidence"></span>%</p>
+    </div>
+  </div>
+  <script src="/frontend/script.js"></script>
+</body>
+</html>
