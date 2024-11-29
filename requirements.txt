@@ -5,3 +5,13 @@ evaluate
 numpy
 transformers[torch]
 tf-keras
+
+streamlit
+librosa
+soundfile
+transformers
+torch
+datasets
+evaluate
+numpy
+transformers[torch]
