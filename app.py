@@ -1,98 +1,55 @@
-import os
 import streamlit as st
-import librosa
-import soundfile as sf
-import numpy as np
 from transformers import AutoProcessor, AutoModelForAudioClassification
 import torch
 import torch.nn.functional as F
+import librosa
 
-# Diretório do modelo treinado
-MODEL_DIR = "emotion-recognition-model"
+# Configuração da página
+st.set_page_config(page_title="Análise de Emoções em Áudio", layout="centered")
 
-# Verificar se os arquivos necessários existem
-if not os.path.exists(MODEL_DIR):
-    st.error("O diretório do modelo treinado não foi encontrado. Verifique a estrutura do projeto.")
-    st.stop()
+# Título do aplicativo
+st.title("Análise de Emoções em Áudio")
+st.write("Faça o upload de um arquivo de áudio para detectar a emoção predominante.")
 
-# Carregar o modelo e o processador treinados a partir do diretório
-try:
-    processor = AutoProcessor.from_pretrained(MODEL_DIR)
-    model = AutoModelForAudioClassification.from_pretrained(MODEL_DIR)
-except Exception as e:
-    st.error(f"Erro ao carregar o modelo treinado: {e}")
-    st.stop()
 
-# Configuração da página do Streamlit
-st.set_page_config(page_title="Análise de Emoções por Áudio", layout="centered")
-st.title("🎙️ Análise de Emoções por Áudio")
-st.markdown("Grave um áudio diretamente no navegador ou envie um arquivo `.wav` para analisar as emoções.")
+# Carregar modelo e processador
+@st.cache_resource
+def load_model():
+    processor = AutoProcessor.from_pretrained("Tagoreparaizo/IAUnit")
+    model = AutoModelForAudioClassification.from_pretrained("Tagoreparaizo/IAUnit")
+    return processor, model
 
-# Upload do áudio
-audio_file = st.file_uploader("Faça upload de um arquivo de áudio (.wav)", type=["wav"])
 
-# Exibir botão para gravação futura
-if st.button("Gravar Áudio"):
-    st.warning("Funcionalidade de gravação direto no navegador ainda em desenvolvimento para Streamlit.")
+processor, model = load_model()
 
-# Processamento do áudio
-if audio_file is not None:
-    try:
-        # Salvar o áudio enviado no diretório apropriado
-        UPLOAD_DIR = "uploaded_audio"
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        uploaded_audio_path = os.path.join(UPLOAD_DIR, "uploaded_audio.wav")
-        with open(uploaded_audio_path, "wb") as f:
-            f.write(audio_file.read())
+# Input do usuário: upload do arquivo de áudio
+uploaded_file = st.file_uploader("Faça upload de um arquivo de áudio (formato .wav):", type=["wav"])
 
-        # Carregar o áudio e validar a taxa de amostragem
-        audio, sample_rate = librosa.load(uploaded_audio_path, sr=None)
-        if sample_rate != 16000:
-            st.warning("Ajustando a taxa de amostragem para 16kHz...")
-            audio = librosa.resample(audio, orig_sr=sample_rate, target_sr=16000)
+if uploaded_file is not None:
+    # Exibir informações sobre o arquivo
+    st.audio(uploaded_file, format="audio/wav")
 
-        # Processar o áudio com o modelo
-        with st.spinner("Processando o áudio..."):
-            inputs = processor(audio, sampling_rate=16000, return_tensors="pt", padding=True)
-            with torch.no_grad():
-                logits = model(**inputs).logits
+    # Processar o áudio
+    file_path = uploaded_file.name
+    audio, sample_rate = librosa.load(uploaded_file, sr=16000)
 
-            # Aplicar softmax para calcular as probabilidades
-            probs = F.softmax(logits, dim=-1)
+    inputs = processor(audio, sampling_rate=16000, return_tensors="pt", padding=True)
 
-            # Identificar a emoção
-            predicted_id = torch.argmax(probs, dim=-1).item()
-            confidence = probs[0, predicted_id].item()
-            emotion_labels = ["angry", "disgusted", "happy", "fearful", "neutral", "sad", "surprised"]
-            predicted_emotion = emotion_labels[predicted_id]
+    with torch.no_grad():
+        logits = model(**inputs).logits
 
-        # Exibir os resultados ao usuário
-        st.success(f"Emoção Prevista: **{predicted_emotion}**")
-        st.info(f"Confiança: **{confidence:.2f}**")
+    probs = F.softmax(logits, dim=-1)
 
-    except Exception as e:
-        st.error(f"Ocorreu um erro ao processar o áudio: {e}")
+    predicted_id = torch.argmax(probs, dim=-1).item()
+    confidence = probs[0, predicted_id].item()
 
-# Instruções adicionais
-st.markdown(
-    """
-    ### Instruções para Gravação de Áudio:
-    - Use ferramentas externas para gravar áudio no formato `.wav` (16kHz).
-    - Certifique-se de que o áudio esteja claro e sem ruídos excessivos para melhores resultados.
-    """
-)
+    emotion_labels = ["angry", "disgusted", "happy", "fearful", "neutral", "sad", "surprised"]
+    predicted_emotion = emotion_labels[predicted_id]
 
-# Diretório onde os arquivos serão salvos
-MODEL_DIR = "emotion-recognition-model"
-
-# Criar o diretório caso ele não exista
-import os
-os.makedirs(MODEL_DIR, exist_ok=True)
-
-# Salvar o modelo e o processador no diretório
-try:
-    processor.save_pretrained(MODEL_DIR)
-    model.save_pretrained(MODEL_DIR)
-    print(f"Arquivos do modelo salvos em {MODEL_DIR}")
-except Exception as e:
-    print(f"Erro ao salvar os arquivos: {e}")
+    # Exibir resultados
+    st.subheader("Resultado da Análise")
+    st.write(f"**Emoção Predita:** {predicted_emotion}")
+    st.write(f"**ID Predito:** {predicted_id}")
+    st.write(f"**Confiança:** {confidence:.2f}")
+else:
+    st.write("Por favor, faça o upload de um arquivo para começar a análise.")
