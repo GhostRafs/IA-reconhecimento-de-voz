@@ -1,55 +1,70 @@
 import streamlit as st
-from transformers import AutoProcessor, AutoModelForAudioClassification
-import torch
-import torch.nn.functional as F
-import librosa
+import sounddevice as sd
+import numpy as np
+import tempfile
+import requests
+import wave
+import os
 
-# Configuração da página
-st.set_page_config(page_title="Análise de Emoções em Áudio", layout="centered")
+# Função para gravar áudio
+def record_audio(duration=5, samplerate=44100):
+    st.write("Gravando áudio...")
+    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype="int16")
+    sd.wait()
+    return recording
 
-# Título do aplicativo
-st.title("Análise de Emoções em Áudio")
-st.write("Faça o upload de um arquivo de áudio para detectar a emoção predominante.")
+# Salvar áudio como .wav
+def save_audio(audio_data, samplerate=44100, filename="audio.wav"):
+    with wave.open(filename, "wb") as wf:
+        wf.setnchannels(1)  # Mono
+        wf.setsampwidth(2)  # 16 bits
+        wf.setframerate(samplerate)
+        wf.writeframes(audio_data.tobytes())
 
+# Enviar áudio para o backend
+def process_audio(file_path):
+    try:
+        with open(file_path, "rb") as f:
+            files = {"file": (file_path, f, "audio/wav")}
+            response = requests.post("http://127.0.0.1:5000/predict", files=files)
+        if response.status_code == 200:
+            result = response.json()
+            return result
+        else:
+            st.error(f"Erro ao processar o áudio: {response.text}")
+    except Exception as e:
+        st.error(f"Erro: {e}")
+    return None
 
-# Carregar modelo e processador
-@st.cache_resource
-def load_model():
-    processor = AutoProcessor.from_pretrained("Tagoreparaizo/IAUnit")
-    model = AutoModelForAudioClassification.from_pretrained("Tagoreparaizo/IAUnit")
-    return processor, model
+# Interface do Streamlit
+st.title("Reconhecimento de Emoções")
 
+# Modalidade: Gravar ou Enviar
+choice = st.radio("Escolha uma ação:", ["Gravar Áudio", "Enviar Áudio"])
 
-processor, model = load_model()
+if choice == "Gravar Áudio":
+    duration = st.slider("Duração da gravação (segundos):", min_value=1, max_value=10, value=5)
+    if st.button("Gravar"):
+        audio_data = record_audio(duration)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        save_audio(audio_data, filename=temp_file.name)
+        st.success("Áudio gravado com sucesso!")
+        result = process_audio(temp_file.name)
+        if result:
+            st.subheader("Resultados:")
+            st.write(f"**Emoção Detectada:** {result['emotion']}")
+            st.write(f"**Confiança:** {result['confidence'] * 100:.2f}%")
+        os.remove(temp_file.name)
 
-# Input do usuário: upload do arquivo de áudio
-uploaded_file = st.file_uploader("Faça upload de um arquivo de áudio (formato .wav):", type=["wav"])
-
-if uploaded_file is not None:
-    # Exibir informações sobre o arquivo
-    st.audio(uploaded_file, format="audio/wav")
-
-    # Processar o áudio
-    file_path = uploaded_file.name
-    audio, sample_rate = librosa.load(uploaded_file, sr=16000)
-
-    inputs = processor(audio, sampling_rate=16000, return_tensors="pt", padding=True)
-
-    with torch.no_grad():
-        logits = model(**inputs).logits
-
-    probs = F.softmax(logits, dim=-1)
-
-    predicted_id = torch.argmax(probs, dim=-1).item()
-    confidence = probs[0, predicted_id].item()
-
-    emotion_labels = ["angry", "disgusted", "happy", "fearful", "neutral", "sad", "surprised"]
-    predicted_emotion = emotion_labels[predicted_id]
-
-    # Exibir resultados
-    st.subheader("Resultado da Análise")
-    st.write(f"**Emoção Predita:** {predicted_emotion}")
-    st.write(f"**ID Predito:** {predicted_id}")
-    st.write(f"**Confiança:** {confidence:.2f}")
-else:
-    st.write("Por favor, faça o upload de um arquivo para começar a análise.")
+elif choice == "Enviar Áudio":
+    uploaded_file = st.file_uploader("Faça o upload de um arquivo de áudio (.wav)", type=["wav"])
+    if uploaded_file:
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        temp_file.write(uploaded_file.read())
+        temp_file.close()
+        result = process_audio(temp_file.name)
+        if result:
+            st.subheader("Resultados:")
+            st.write(f"**Emoção Detectada:** {result['emotion']}")
+            st.write(f"**Confiança:** {result['confidence'] * 100:.2f}%")
+        os.remove(temp_file.name)
