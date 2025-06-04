@@ -16,7 +16,6 @@ with torch.no_grad():
     logits = model(**inputs).logits
 
 probs = F.softmax(logits, dim=-1)
-token = {"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"}
 
 predicted_id = torch.argmax(probs, dim=-1).item()
 confidence = probs[0, predicted_id].item()
